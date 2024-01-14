@@ -7,7 +7,7 @@ ARG NVIDIA_CUDA_VERSION=12.3.1
 FROM nvidia/cuda:${NVIDIA_CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION} as builder
 
 ARG COLMAP_GIT_COMMIT=main
-ARG CUDA_ARCHITECTURES=50
+ARG CUDA_ARCHITECTURES=86
 ENV QT_XCB_GL_INTEGRATION=xcb_egl
 
 # Prevent stop building ubuntu at time zone selection.
@@ -38,13 +38,13 @@ RUN apt-get update && \
         libceres-dev
 
 # Build and install COLMAP.
-RUN git clone https://github.com/colmap/colmap.git colmap_${COLMAP_GIT_COMMIT}
+RUN git clone https://github.com/jyomu/colmap.git colmap_${COLMAP_GIT_COMMIT}
 RUN cd colmap_${COLMAP_GIT_COMMIT} && \
-    git fetch https://github.com/colmap/colmap.git ${COLMAP_GIT_COMMIT} && \
+    git fetch https://github.com/jyomu/colmap.git ${COLMAP_GIT_COMMIT} && \
     git checkout FETCH_HEAD && \
     mkdir build && \
     cd build && \
-    cmake .. -GNinja -DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHITECTURES} \
+    cmake .. -GNinja -DCUDA_ENABLED=ON -DCMAKE_CUDA_ARCHITECTURES=${CUDA_ARCHITECTURES} \
         -DCMAKE_INSTALL_PREFIX=/colmap && \
     ninja install && \
     cd .. && rm -rf colmap_${COLMAP_GIT_COMMIT}
