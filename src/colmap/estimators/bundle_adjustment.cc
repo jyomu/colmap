@@ -590,7 +590,9 @@ bool RigBundleAdjuster::Solve(Reconstruction* reconstruction,
   ceres::Solver::Options solver_options = options_.solver_options;
   const bool has_sparse =
       solver_options.sparse_linear_algebra_library_type != ceres::NO_SPARSE;
-
+#if defined(COLMAP_CUDA_ENABLED)
+  solver_options.linear_solver_type = ceres::DENSE_SCHUR;
+#else   // COLMAP_CUDA_ENABLED
   // Empirical choice.
   const size_t kMaxNumImagesDirectDenseSolver = 50;
   const size_t kMaxNumImagesDirectSparseSolver = 1000;
@@ -603,6 +605,7 @@ bool RigBundleAdjuster::Solve(Reconstruction* reconstruction,
     solver_options.linear_solver_type = ceres::ITERATIVE_SCHUR;
     solver_options.preconditioner_type = ceres::SCHUR_JACOBI;
   }
+#endif  // COLMAP_CUDA_ENABLED
 
   solver_options.num_threads =
       GetEffectiveNumThreads(solver_options.num_threads);
